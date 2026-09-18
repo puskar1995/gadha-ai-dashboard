@@ -56,8 +56,10 @@
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    html, body { overflow-x: clip; }
     body {
+      -webkit-tap-highlight-color: transparent;
       margin: 0;
       min-width: 0;
       min-height: 100vh;
@@ -428,7 +430,8 @@
       font: 400 10px/1.35 "IBM Plex Mono", monospace;
     }
     .data-row span:first-child { color: var(--muted); }
-    .data-row span:last-child { text-align: right; }
+    .data-row span { min-width: 0; }
+    .data-row span:last-child { text-align: right; overflow-wrap: anywhere; }
 
     .action-stack { display: grid; gap: 8px; margin-top: 18px; }
     .action-button {
@@ -564,7 +567,11 @@
       .snapshot { padding-top: 8px; }
       .snapshot span:last-child { max-width: 175px; }
       .source-link span { display: none; }
-      .ghost-button { padding: 0 10px; }
+      #soundLabel { display: none; }
+      .ghost-button { padding: 0 10px; min-height: 44px; }
+      .source-link { min-height: 44px; }
+      .panel-head { padding: 0 14px; gap: 10px; }
+      .panel-code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .masthead { padding: 34px 0 28px; }
       .masthead h1 { font-size: clamp(37px, 12vw, 55px); }
       .tabs { width: 100%; }

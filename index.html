@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Oxanium:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Gadha AI</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #eaf3f2;
+      --bg-deep: #dce9e7;
+      --panel: rgba(246, 252, 251, .86);
+      --panel-solid: #f6fcfb;
+      --panel-strong: #ffffff;
+      --line: rgba(7, 68, 70, .18);
+      --line-bright: rgba(0, 119, 121, .45);
+      --text: #092e31;
+      --muted: #4c6668;
+      --cyan: #007f83;
+      --cyan-bright: #00a5aa;
+      --cyan-soft: rgba(0, 127, 131, .12);
+      --amber: #ad5b00;
+      --amber-soft: rgba(173, 91, 0, .12);
+      --red: #a22c3c;
+      --red-soft: rgba(162, 44, 60, .1);
+      --shadow: 0 18px 60px rgba(13, 65, 67, .13);
+      --grid: rgba(0, 104, 108, .09);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #030b10;
+        --bg-deep: #06141a;
+        --panel: rgba(7, 21, 27, .8);
+        --panel-solid: #081820;
+        --panel-strong: #0b2029;
+        --line: rgba(106, 220, 218, .17);
+        --line-bright: rgba(111, 255, 248, .42);
+        --text: #e6f8f6;
+        --muted: #91abaa;
+        --cyan: #5be3de;
+        --cyan-bright: #91fff8;
+        --cyan-soft: rgba(91, 227, 222, .1);
+        --amber: #ffb85c;
+        --amber-soft: rgba(255, 184, 92, .1);
+        --red: #ff8597;
+        --red-soft: rgba(255, 133, 151, .1);
+        --shadow: 0 24px 80px rgba(0, 0, 0, .42);
+        --grid: rgba(91, 227, 222, .055);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        radial-gradient(circle at 50% -15%, var(--cyan-soft), transparent 43%),
+        var(--bg);
+      background-size: 32px 32px, 32px 32px, auto, auto;
+      font-family: "Oxanium", sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, a { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--cyan-bright);
+      outline-offset: 3px;
+    }
+
+    .shell {
+      width: min(1520px, 100%);
+      margin: 0 auto;
+      padding: 18px clamp(14px, 2.5vw, 38px) 56px;
+    }
+
+    .utility {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .snapshot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: var(--muted);
+      font: 500 11px/1.4 "IBM Plex Mono", monospace;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+    }
+
+    .snapshot-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border: 1px solid var(--cyan);
+      transform: rotate(45deg);
+      background: var(--cyan-soft);
+      box-shadow: 0 0 12px var(--cyan-soft);
+    }
+
+    .utility-actions { display: flex; align-items: center; gap: 9px; }
+
+    .ghost-button, .source-link {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+      transition: border-color .2s ease, background .2s ease;
+      font-size: 12px;
+    }
+
+    .ghost-button:hover, .source-link:hover { border-color: var(--line-bright); background: var(--cyan-soft); }
+    .ghost-button svg, .source-link svg { width: 15px; height: 15px; }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+      align-items: end;
+      gap: 34px;
+      padding: clamp(34px, 6vw, 78px) 0 34px;
+    }
+
+    .masthead h1 {
+      max-width: 840px;
+      margin: 0;
+      font-size: clamp(35px, 5.4vw, 78px);
+      line-height: .96;
+      letter-spacing: -.055em;
+      font-weight: 600;
+    }
+
+    .masthead h1 span { color: var(--cyan); }
+
+    .masthead-copy {
+      max-width: 650px;
+      margin: 19px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.5vw, 19px);
+      line-height: 1.65;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      padding: 16px 18px;
+      border-top: 1px solid var(--line-bright);
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, var(--cyan-soft), transparent);
+    }
+
+    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .legend-label { color: var(--muted); font-size: 12px; }
+    .legend-value { font: 500 12px/1.2 "IBM Plex Mono", monospace; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin: 0 0 14px;
+      padding: 4px;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .03em;
+    }
+
+    .tab[aria-selected="true"] { background: var(--cyan-soft); color: var(--cyan); }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(230px, .7fr) minmax(410px, 1.45fr) minmax(260px, .8fr);
+      gap: 14px;
+      min-height: 640px;
+    }
+
+    .panel {
+      position: relative;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 72px;
+      height: 1px;
+      background: var(--cyan-bright);
+      box-shadow: 0 0 16px var(--cyan);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 56px;
+      padding: 0 17px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .055em; text-transform: uppercase; }
+    .panel-code { color: var(--muted); font: 400 10px/1 "IBM Plex Mono", monospace; }
+
+    .stage-list { padding: 9px; }
+    .stage {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+    .stage + .stage { border-top-color: var(--line); }
+    .stage:hover, .stage.active { background: var(--cyan-soft); border-color: var(--line-bright); }
+
+    .stage-index {
+      width: 29px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font: 500 10px/1 "IBM Plex Mono", monospace;
+      transform: rotate(45deg);
+    }
+    .stage-index span { transform: rotate(-45deg); }
+    .stage strong { display: block; font-size: 12px; font-weight: 500; }
+    .stage small { display: block; margin-top: 4px; color: var(--muted); font: 400 10px/1.35 "IBM Plex Mono", monospace; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font: 500 9px/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+    .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+    .status.active { color: var(--cyan); }
+    .status.idle { color: var(--amber); }
+    .status.offline { color: var(--red); }
+    .status.unknown { color: var(--muted); }
+
+    .architecture-note {
+      margin: 8px 13px 14px;
+      padding: 12px 13px;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font: 400 10px/1.6 "IBM Plex Mono", monospace;
+    }
+
+    .core-panel { min-height: 640px; }
+    .core-scene {
+      position: relative;
+      min-height: 430px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at center, var(--cyan-soft), transparent 48%),
+        linear-gradient(180deg, transparent, var(--bg-deep));
+      perspective: 850px;
+    }
+
+    .core-scene::after {
+      content: "";
+      position: absolute;
+      left: -15%; right: -15%; bottom: -14%;
+      height: 55%;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 32px 32px;
+      transform: rotateX(66deg);
+      transform-origin: center bottom;
+      mask-image: linear-gradient(to bottom, transparent, #000 35%);
+      z-index: -1;
+    }
+
+    .orbital {
+      position: relative;
+      width: min(340px, 74vw);
+      aspect-ratio: 1;
+      transform-style: preserve-3d;
+      transform: rotateX(58deg) rotateZ(-8deg);
+    }
+
+    .ring {
+      position: absolute;
+      border: 1px solid var(--line-bright);
+      border-radius: 50%;
+      inset: 6%;
+      box-shadow: inset 0 0 25px var(--cyan-soft), 0 0 20px var(--cyan-soft);
+    }
+    .ring.two { inset: 18%; border-style: dashed; animation: spin 14s linear infinite reverse; }
+    .ring.three { inset: 31%; border-width: 2px; animation: pulse 2.8s ease-in-out infinite; }
+    .ring::before, .ring::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border: 2px solid var(--cyan-bright);
+      background: var(--panel-solid);
+      transform: rotate(45deg);
+      box-shadow: 0 0 16px var(--cyan);
+    }
+    .ring::before { top: 7%; left: 18%; }
+    .ring::after { right: 10%; bottom: 18%; }
+
+    .core {
+      position: absolute;
+      inset: 38%;
+      display: grid;
+      place-items: center;
+      color: var(--cyan-bright);
+      border: 1px solid var(--cyan-bright);
+      background: var(--panel-solid);
+      transform: translateZ(62px) rotateZ(45deg);
+      box-shadow: 0 0 32px var(--cyan-soft), inset 0 0 22px var(--cyan-soft);
+    }
+    .core::after { content: ""; width: 44%; aspect-ratio: 1; border: 1px solid currentColor; background: currentColor; opacity: .72; }
+
+    .float-node {
+      position: absolute;
+      min-width: 126px;
+      padding: 8px 10px;
+      border: 1px solid var(--line-bright);
+      background: var(--panel-solid);
+      color: var(--text);
+      box-shadow: 0 12px 30px rgba(0,0,0,.1);
+      font: 500 9px/1.45 "IBM Plex Mono", monospace;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .float-node::before { content: ""; position: absolute; width: 18px; height: 1px; background: var(--line-bright); top: 50%; }
+    .float-node.left::before { right: 7px; }
+    .float-node.right::before { left: 7px; }
+    .node-a { left: 6%; top: 23%; }
+    .node-b { right: 5%; top: 30%; }
+    .node-c { left: 10%; bottom: 17%; }
+    .node-d { right: 8%; bottom: 15%; }
+    .float-node:hover { background: var(--cyan-soft); }
+    .float-node span { display: block; color: var(--muted); font-weight: 400; }
+
+    .core-readout {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 15px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 3;
+    }
+    .readout-big { font-size: 22px; color: var(--cyan); }
+    .readout-label { color: var(--muted); font: 400 9px/1.5 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .frequency { display: flex; gap: 3px; height: 26px; align-items: end; }
+    .frequency i { display: block; width: 3px; background: var(--cyan); opacity: .7; animation: signal 1.2s ease-in-out infinite alternate; }
+    .frequency i:nth-child(2n) { animation-delay: -.5s; }
+    .frequency i:nth-child(3n) { animation-delay: -.85s; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+    }
+    .metric { min-width: 0; padding: 16px; }
+    .metric + .metric { border-left: 1px solid var(--line); }
+    .metric strong { display: block; margin-top: 8px; font-size: clamp(17px, 2vw, 25px); font-weight: 500; }
+    .metric small { color: var(--muted); font: 400 9px/1.35 "IBM Plex Mono", monospace; text-transform: uppercase; }
+
+    .inspector-body { padding: 16px; }
+    .inspect-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .inspect-title { margin: 0; font-size: 21px; font-weight: 500; }
+    .inspect-copy { min-height: 72px; margin: 0 0 19px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 11px 0;
+      border-top: 1px solid var(--line);
+      font: 400 10px/1.35 "IBM Plex Mono", monospace;
+    }
+    .data-row span:first-child { color: var(--muted); }
+    .data-row span:last-child { text-align: right; }
+
+    .action-stack { display: grid; gap: 8px; margin-top: 18px; }
+    .action-button {
+      min-height: 43px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .action-button:hover { border-color: var(--line-bright); background: var(--cyan-soft); }
+    .action-button code { color: var(--muted); font: 400 9px/1 "IBM Plex Mono", monospace; }
+
+    .lower-grid {
+      display: grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .timeline { padding: 18px; }
+    .timeline-track {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      margin-top: 18px;
+    }
+    .timeline-step { position: relative; min-width: 0; padding: 21px 12px 5px 0; border-top: 1px solid var(--line); }
+    .timeline-step::before { content: ""; position: absolute; top: -5px; left: 0; width: 8px; height: 8px; border: 1px solid var(--cyan); background: var(--panel-solid); transform: rotate(45deg); }
+    .timeline-step strong { display: block; margin-bottom: 5px; font-size: 11px; }
+    .timeline-step span { display: block; color: var(--muted); font: 400 9px/1.5 "IBM Plex Mono", monospace; }
+
+    .source-card { padding: 18px; }
+    .source-card p { margin: 14px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .source-card a { color: var(--cyan); text-decoration-thickness: 1px; text-underline-offset: 3px; word-break: break-word; }
+
+    .inventory-panel { grid-column: 1 / -1; }
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .inventory-item {
+      min-width: 0;
+      padding: 15px 16px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .inventory-item:nth-child(4n) { border-right: 0; }
+    .inventory-item:nth-last-child(-n+4) { border-bottom: 0; }
+    .inventory-item strong { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 500; }
+    .inventory-item span { color: var(--muted); font: 400 9px/1.45 "IBM Plex Mono", monospace; }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      width: min(440px, calc(100% - 28px));
+      transform: translate(-50%, 18px);
+      padding: 13px 15px;
+      border: 1px solid var(--line-bright);
+      background: var(--panel-solid);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      font: 400 11px/1.5 "IBM Plex Mono", monospace;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .flow-view { display: none; }
+    .flow-view.visible { display: block; }
+    .overview-view.hidden { display: none; }
+    .flow-map { padding: clamp(18px, 3vw, 34px); }
+    .flow-lane {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 28px;
+      align-items: stretch;
+      position: relative;
+    }
+    .flow-lane::before { content: ""; position: absolute; left: 7%; right: 7%; top: 50%; height: 1px; background: var(--line-bright); z-index: 0; }
+    .flow-box { position: relative; z-index: 1; padding: 18px 14px; border: 1px solid var(--line); background: var(--panel-solid); min-height: 140px; }
+    .flow-box strong { display: block; font-size: 13px; margin-bottom: 9px; }
+    .flow-box p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .flow-box code { display: inline-block; margin-bottom: 14px; color: var(--cyan); font: 500 9px/1 "IBM Plex Mono", monospace; }
+    .flow-box.active { border-color: var(--line-bright); box-shadow: inset 0 -3px 0 var(--cyan); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 50% { opacity: .5; transform: scale(.94); } }
+    @keyframes signal { from { height: 18%; } to { height: 100%; } }
+
+    @media (max-width: 1120px) {
+      .dashboard { grid-template-columns: minmax(210px, .7fr) minmax(390px, 1.3fr); }
+      .inspector { grid-column: 1 / -1; }
+      .inspector-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+      .inspect-status, .inspect-title, .inspect-copy { grid-column: 1; }
+      .data-stack, .action-stack { grid-column: 2; }
+      .data-stack { grid-row: 1 / span 4; }
+      .action-stack { grid-row: 4; align-self: end; }
+    }
+
+    @media (max-width: 820px) {
+      .masthead { grid-template-columns: 1fr; gap: 18px; }
+      .legend { max-width: 520px; }
+      .dashboard { grid-template-columns: 1fr; }
+      .core-panel { min-height: auto; }
+      .core-panel { grid-row: 1; }
+      .stage-panel { grid-row: 2; }
+      .inspector { grid-row: 3; grid-column: auto; }
+      .lower-grid { grid-template-columns: 1fr; }
+      .inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .inventory-item:nth-child(4n) { border-right: 1px solid var(--line); }
+      .inventory-item:nth-child(2n) { border-right: 0; }
+      .inventory-item:nth-last-child(-n+4) { border-bottom: 1px solid var(--line); }
+      .inventory-item:nth-last-child(-n+2) { border-bottom: 0; }
+      .flow-lane { grid-template-columns: 1fr; gap: 12px; }
+      .flow-lane::before { left: 22px; right: auto; top: 8%; bottom: 8%; width: 1px; height: auto; }
+      .flow-box { min-height: 0; margin-left: 17px; }
+      .timeline-track { grid-template-columns: 1fr; }
+      .timeline-step { padding-left: 23px; border-top: 0; border-left: 1px solid var(--line); }
+      .timeline-step::before { top: 25px; left: -5px; }
+    }
+
+    @media (max-width: 600px) {
+      .shell { padding-top: 10px; }
+      .utility { align-items: flex-start; }
+      .snapshot { padding-top: 8px; }
+      .snapshot span:last-child { max-width: 175px; }
+      .source-link span { display: none; }
+      .ghost-button { padding: 0 10px; }
+      .masthead { padding: 34px 0 28px; }
+      .masthead h1 { font-size: clamp(37px, 12vw, 55px); }
+      .tabs { width: 100%; }
+      .tab { flex: 1; padding: 10px 9px; }
+      .core-scene { min-height: 390px; }
+      .float-node { min-width: 108px; padding: 7px; font-size: 8px; }
+      .node-a { left: 3%; top: 18%; }
+      .node-b { right: 3%; top: 25%; }
+      .node-c { left: 4%; bottom: 21%; }
+      .node-d { right: 4%; bottom: 18%; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric:last-child { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+      .metric:nth-child(2) { border-left: 1px solid var(--line); }
+      .inspector-body { display: block; }
+      .action-stack { margin-top: 18px; }
+      .inventory-grid { grid-template-columns: 1fr; }
+      .inventory-item, .inventory-item:nth-child(2n), .inventory-item:nth-child(4n), .inventory-item:nth-last-child(-n+2), .inventory-item:nth-last-child(-n+4) { border-right: 0; border-bottom: 1px solid var(--line); }
+      .inventory-item:last-child { border-bottom: 0; }
+      .legend-label { font-size: 10px; }
+      .legend-value { font-size: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="utility">
+      <div class="snapshot">
+        <span class="snapshot-dot" aria-hidden="true"></span>
+        <span>Gadha AI · Sep 18, 2026 · 1:50 AM EDT</span>
+      </div>
+      <div class="utility-actions">
+        <button class="ghost-button" id="soundToggle" type="button" aria-pressed="false" title="Enable interface sound">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path class="sound-wave" d="M15 9.5a4 4 0 0 1 0 5M18 7a7.2 7.2 0 0 1 0 10"/></svg>
+          <span id="soundLabel">Sound off</span>
+        </button>
+        <a class="source-link" href="#projectBoundary">
+          <span>Project details</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        </a>
+        <a class="source-link" href="https://gadha-ai-production.up.railway.app" target="_blank" rel="noopener">
+          <span>Open console</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <section class="masthead">
+      <div>
+        <h1>AI core: <span>active.</span><br />Iron Man control: offline.</h1>
+        <p class="masthead-copy">A system-level view of Gadha AI’s workflow—from request intake through orchestration, tools, memory, and response. Select any subsystem to inspect what the current build exposes.</p>
+      </div>
+      <div class="legend" aria-label="Snapshot summary">
+        <div class="legend-row"><span class="legend-label">CORE SIGNAL</span><span class="legend-value" style="color:var(--cyan)">ACTIVE</span></div>
+        <div class="legend-row"><span class="legend-label">IRON MAN CONTROL</span><span class="legend-value" style="color:var(--red)">OFFLINE</span></div>
+        <div class="legend-row"><span class="legend-label">MEMORIES STORED</span><span class="legend-value">0</span></div>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Dashboard views">
+      <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="overview" id="tabOverview">System overview</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="flow" id="tabFlow">End-to-end flow</button>
+    </div>
+
+    <div class="overview-view" id="overview" role="tabpanel" aria-labelledby="tabOverview">
+      <section class="dashboard">
+        <article class="panel stage-panel">
+          <header class="panel-head"><h2 class="panel-title">Workflow stack</h2><span class="panel-code">05 NODES</span></header>
+          <div class="stage-list">
+            <button class="stage active" type="button" data-key="intake">
+              <span class="stage-index"><span>01</span></span><span><strong>Request intake</strong><small>Voice · chat · gestures</small></span><span class="status unknown">unverified</span>
+            </button>
+            <button class="stage" type="button" data-key="core">
+              <span class="stage-index"><span>02</span></span><span><strong>Gadha AI core</strong><small>Intent + orchestration</small></span><span class="status active">active</span>
+            </button>
+            <button class="stage" type="button" data-key="agents">
+              <span class="stage-index"><span>03</span></span><span><strong>Dev team</strong><small>Multi-agent execution</small></span><span class="status unknown">unverified</span>
+            </button>
+            <button class="stage" type="button" data-key="tools">
+              <span class="stage-index"><span>04</span></span><span><strong>Tool bridge</strong><small>Local tools · calls · messages</small></span><span class="status unknown">unverified</span>
+            </button>
+            <button class="stage" type="button" data-key="memory">
+              <span class="stage-index"><span>05</span></span><span><strong>Memory layer</strong><small>Context + stored memory</small></span><span class="status idle">empty</span>
+            </button>
+          </div>
+          <p class="architecture-note">States marked “unverified” were not exposed in the source snapshot. No runtime health is inferred.</p>
+        </article>
+
+        <article class="panel core-panel">
+          <header class="panel-head"><h2 class="panel-title">Core topology</h2><span class="panel-code">GADHA AI // UNIFIED CORE</span></header>
+          <div class="core-scene">
+            <button class="float-node left" type="button" data-key="intake">Input bus<span>voice / chat</span></button>
+            <button class="float-node right node-b" type="button" data-key="agents">Agent mesh<span>status loading</span></button>
+            <button class="float-node left node-c" type="button" data-key="memory">Memory vault<span>0 records</span></button>
+            <button class="float-node right node-d" type="button" data-key="tools">Tool bridge<span>unverified</span></button>
+            <div class="orbital" aria-hidden="true">
+              <div class="ring"></div><div class="ring two"></div><div class="ring three"></div><div class="core"></div>
+            </div>
+            <div class="core-readout">
+              <div><div class="readout-label">Observed core state</div><div class="readout-big">ACTIVE</div></div>
+              <div class="frequency" aria-label="Decorative signal animation">
+                <i style="height:35%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:92%"></i><i style="height:56%"></i><i style="height:78%"></i><i style="height:31%"></i><i style="height:64%"></i><i style="height:88%"></i><i style="height:42%"></i>
+              </div>
+            </div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><small>Gesture tracking</small><strong>IDLE</strong></div>
+            <div class="metric"><small>Stored memory</small><strong>0</strong></div>
+            <div class="metric"><small>Iron Man control</small><strong style="color:var(--red)">OFFLINE</strong></div>
+          </div>
+        </article>
+
+        <aside class="panel inspector">
+          <header class="panel-head"><h2 class="panel-title">Inspector</h2><span class="panel-code" id="inspectCode">NODE 01</span></header>
+          <div class="inspector-body">
+            <div class="inspect-status"><h3 class="inspect-title" id="inspectTitle">Request intake</h3><span class="status unknown" id="inspectStatus">unverified</span></div>
+            <p class="inspect-copy" id="inspectCopy">Gadha AI accepts conversational requests and describes gesture controls. The current source snapshot does not expose a live input event stream.</p>
+            <div class="data-stack">
+              <div class="data-row"><span>Observed</span><span id="inspectObserved">Voice, text, hand gestures</span></div>
+              <div class="data-row"><span>Runtime detail</span><span id="inspectRuntime">Not exposed</span></div>
+              <div class="data-row"><span>Next hop</span><span id="inspectNext">Gadha AI core</span></div>
+            </div>
+            <div class="action-stack">
+              <button class="action-button" type="button" id="traceButton"><span>Trace this path</span><code>FLOW ↗</code></button>
+              <button class="action-button" type="button" id="bootSound"><span>Play system cue</span><code>AUDIO ◉</code></button>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel timeline">
+          <header class="panel-head" style="margin:-18px -18px 0"><h2 class="panel-title">Mission path</h2><span class="panel-code">REFERENCE FLOW</span></header>
+          <div class="timeline-track">
+            <div class="timeline-step"><strong>Capture</strong><span>Receive a request</span></div>
+            <div class="timeline-step"><strong>Interpret</strong><span>Resolve intent</span></div>
+            <div class="timeline-step"><strong>Route</strong><span>Select agent or tool</span></div>
+            <div class="timeline-step"><strong>Execute</strong><span>Run the capability</span></div>
+            <div class="timeline-step"><strong>Return</strong><span>Report the result</span></div>
+          </div>
+        </article>
+        <article class="panel source-card" id="projectBoundary">
+          <header class="panel-head" style="margin:-18px -18px 0"><h2 class="panel-title">Project boundary</h2><span class="panel-code">GADHA AI</span></header>
+          <p>Gadha AI is kept as a separate dashboard project, ready for its own Railway deployment and a later connection to Pandu.</p>
+        </article>
+        <article class="panel inventory-panel">
+          <header class="panel-head"><h2 class="panel-title">Exposed subsystem inventory</h2><span class="panel-code">SOURCE STATUS</span></header>
+          <div class="inventory-grid">
+            <div class="inventory-item"><strong>Live intelligence feed</strong><span class="status active">LIVE label</span></div>
+            <div class="inventory-item"><strong>Active agents</strong><span class="status unknown">loading</span></div>
+            <div class="inventory-item"><strong>Mission timeline</strong><span class="status unknown">loading</span></div>
+            <div class="inventory-item"><strong>Quick commands</strong><span class="status unknown">no state exposed</span></div>
+            <div class="inventory-item"><strong>System monitor</strong><span class="status unknown">no state exposed</span></div>
+            <div class="inventory-item"><strong>Memory insights</strong><span class="status idle">0 stored</span></div>
+            <div class="inventory-item"><strong>LLM & integration</strong><span class="status unknown">loading</span></div>
+            <div class="inventory-item"><strong>Media link</strong><span class="status unknown">no state exposed</span></div>
+            <div class="inventory-item"><strong>Sat-link feed</strong><span class="status unknown">no state exposed</span></div>
+            <div class="inventory-item"><strong>Today headlines</strong><span class="status unknown">loading</span></div>
+            <div class="inventory-item"><strong>Gesture tracking</strong><span class="status unknown">module idle</span></div>
+            <div class="inventory-item"><strong>Iron Man control</strong><span class="status offline">offline</span></div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <section class="flow-view panel" id="flow" role="tabpanel" aria-labelledby="tabFlow" hidden>
+      <header class="panel-head"><h2 class="panel-title">Request lifecycle</h2><span class="panel-code">SELECTED ARCHITECTURE VIEW</span></header>
+      <div class="flow-map">
+        <div class="flow-lane">
+          <article class="flow-box"><code>01 / INPUT</code><strong>Request intake</strong><p>Voice, chat, or gesture input enters the system.</p></article>
+          <article class="flow-box active"><code>02 / CORE</code><strong>Interpret + plan</strong><p>Gadha AI resolves intent and chooses an execution route.</p></article>
+          <article class="flow-box"><code>03 / ROUTE</code><strong>Agent or tool</strong><p>Work can move to the four-agent dev team or a local capability.</p></article>
+          <article class="flow-box"><code>04 / STATE</code><strong>Memory + monitor</strong><p>Context and system status support the active task.</p></article>
+          <article class="flow-box"><code>05 / OUTPUT</code><strong>Response</strong><p>The result returns through the conversational interface.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const nodes = {
+      intake: { code: 'NODE 01', title: 'Request intake', status: 'unverified', tone: 'unknown', copy: 'Gadha AI accepts conversational requests and describes gesture controls. The current source snapshot does not expose a live input event stream.', observed: 'Voice, text, hand gestures', runtime: 'Not exposed', next: 'Gadha AI core' },
+      core: { code: 'NODE 02', title: 'Gadha AI core', status: 'active', tone: 'active', copy: 'The deployed interface explicitly labels the AI core as active. Internal model routing, latency, and queue depth are not exposed in the static response.', observed: 'AI Core Active', runtime: 'Unified core', next: 'Agent or tool routing' },
+      agents: { code: 'NODE 03', title: 'Agent execution layer', status: 'loading', tone: 'unknown', copy: 'The interface exposes an Active Agents area, but it remained loading in this snapshot. Agent count, individual health, and current jobs were not available.', observed: 'Active Agents: Loading', runtime: 'Not exposed', next: 'Execution layer' },
+      tools: { code: 'NODE 04', title: 'Tool bridge', status: 'unverified', tone: 'unknown', copy: 'Gadha AI describes local tools, messaging, and calling capabilities, but the source snapshot does not expose a dedicated Tool Bridge state or an active invocation.', observed: 'Capabilities described', runtime: 'State not exposed', next: 'Result return' },
+      memory: { code: 'NODE 05', title: 'Memory layer', status: 'empty', tone: 'idle', copy: 'The deployed interface reports zero stored memories. Memory type, retrieval quality, and persistence scope are not exposed.', observed: '0 memories stored', runtime: 'No records shown', next: 'Gadha AI core' }
+    };
+
+    const inspectCode = document.getElementById('inspectCode');
+    const inspectTitle = document.getElementById('inspectTitle');
+    const inspectStatus = document.getElementById('inspectStatus');
+    const inspectCopy = document.getElementById('inspectCopy');
+    const inspectObserved = document.getElementById('inspectObserved');
+    const inspectRuntime = document.getElementById('inspectRuntime');
+    const inspectNext = document.getElementById('inspectNext');
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    let audioEnabled = false;
+    let audioContext;
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add('show');
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function inspect(key, announce = false) {
+      const data = nodes[key];
+      if (!data) return;
+      inspectCode.textContent = data.code;
+      inspectTitle.textContent = data.title;
+      inspectStatus.textContent = data.status;
+      inspectStatus.className = `status ${data.tone}`;
+      inspectCopy.textContent = data.copy;
+      inspectObserved.textContent = data.observed;
+      inspectRuntime.textContent = data.runtime;
+      inspectNext.textContent = data.next;
+      document.querySelectorAll('.stage').forEach(el => el.classList.toggle('active', el.dataset.key === key));
+      if (announce) showToast(`${data.title} selected · ${data.status}`);
+      playTone(420, .055, .025);
+    }
+
+    document.querySelectorAll('[data-key]').forEach(el => {
+      el.addEventListener('click', () => inspect(el.dataset.key, true));
+    });
+
+    const tabOverview = document.getElementById('tabOverview');
+    const tabFlow = document.getElementById('tabFlow');
+    const overview = document.getElementById('overview');
+    const flow = document.getElementById('flow');
+
+    function setView(name) {
+      const isOverview = name === 'overview';
+      tabOverview.setAttribute('aria-selected', String(isOverview));
+      tabFlow.setAttribute('aria-selected', String(!isOverview));
+      overview.classList.toggle('hidden', !isOverview);
+      flow.classList.toggle('visible', !isOverview);
+      flow.hidden = isOverview;
+      playTone(isOverview ? 360 : 520, .07, .025);
+    }
+    tabOverview.addEventListener('click', () => setView('overview'));
+    tabFlow.addEventListener('click', () => setView('flow'));
+
+    function initAudio() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === 'suspended') audioContext.resume();
+    }
+
+    function playTone(freq = 440, duration = .08, volume = .035) {
+      if (!audioEnabled) return;
+      initAudio();
+      const now = audioContext.currentTime;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.35, now + duration);
+      gain.gain.setValueAtTime(.0001, now);
+      gain.gain.exponentialRampToValueAtTime(volume, now + .012);
+      gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+      osc.connect(gain).connect(audioContext.destination);
+      osc.start(now);
+      osc.stop(now + duration + .02);
+    }
+
+    function playBootCue() {
+      if (!audioEnabled) {
+        showToast('Enable sound first to hear the system cue.');
+        return;
+      }
+      [220, 330, 495, 660].forEach((f, i) => setTimeout(() => playTone(f, .11, .045), i * 90));
+      showToast('System cue played.');
+    }
+
+    const soundToggle = document.getElementById('soundToggle');
+    const soundLabel = document.getElementById('soundLabel');
+    soundToggle.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      soundToggle.setAttribute('aria-pressed', String(audioEnabled));
+      soundLabel.textContent = audioEnabled ? 'Sound on' : 'Sound off';
+      if (audioEnabled) {
+        initAudio();
+        playTone(360, .09, .045);
+        setTimeout(() => playTone(620, .12, .035), 80);
+        showToast('Interface sound enabled.');
+      } else {
+        showToast('Interface sound muted.');
+      }
+    });
+
+    document.getElementById('bootSound').addEventListener('click', playBootCue);
+    document.getElementById('traceButton').addEventListener('click', () => {
+      setView('flow');
+      document.getElementById('flow').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Showing the end-to-end request path.');
+    });
+  </script>
+</body>
+</html>
